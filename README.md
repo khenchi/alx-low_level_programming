@@ -272,3 +272,88 @@ def add_periodic_sums(df, date_column, value_column, reference_date):
     ])
 
     return pd.concat([df, new_rows], ignore_index=True)
+
+
+
+
+
+
+
+
+You can use the openpyxl library to copy a sheet from one Excel file to another while preserving formatting. Here’s a function to achieve this:
+
+Steps:
+
+1. Load the source workbook and the destination workbook.
+
+
+2. Copy the sheet structure, including values, styles, and dimensions.
+
+
+3. Save the destination workbook.
+
+
+
+Function:
+
+import openpyxl
+from openpyxl.utils import get_column_letter
+from openpyxl.styles import NamedStyle
+
+def copy_excel_sheet(source_file, source_sheet_name, destination_file, destination_sheet_name):
+    # Load the source and destination workbooks
+    src_wb = openpyxl.load_workbook(source_file, data_only=False)
+    dest_wb = openpyxl.load_workbook(destination_file)
+
+    # Get the source sheet
+    if source_sheet_name not in src_wb.sheetnames:
+        raise ValueError(f"Sheet '{source_sheet_name}' not found in {source_file}")
+    src_sheet = src_wb[source_sheet_name]
+
+    # Create a new sheet in the destination workbook
+    if destination_sheet_name in dest_wb.sheetnames:
+        dest_wb.remove(dest_wb[destination_sheet_name])  # Remove if already exists
+    dest_sheet = dest_wb.create_sheet(destination_sheet_name)
+
+    # Copy cell values, styles, and dimensions
+    for row in src_sheet.iter_rows():
+        for cell in row:
+            new_cell = dest_sheet.cell(row=cell.row, column=cell.column, value=cell.value)
+            
+            # Copy cell style
+            if cell.has_style:
+                new_cell.font = cell.font
+                new_cell.border = cell.border
+                new_cell.fill = cell.fill
+                new_cell.number_format = cell.number_format
+                new_cell.protection = cell.protection
+                new_cell.alignment = cell.alignment
+
+    # Copy column widths
+    for col in src_sheet.column_dimensions:
+        dest_sheet.column_dimensions[col].width = src_sheet.column_dimensions[col].width
+
+    # Copy row heights
+    for row_idx in src_sheet.row_dimensions:
+        dest_sheet.row_dimensions[row_idx].height = src_sheet.row_dimensions[row_idx].height
+
+    # Save the destination workbook
+    dest_wb.save(destination_file)
+    src_wb.close()
+    dest_wb.close()
+    print(f"Sheet '{source_sheet_name}' copied to '{destination_sheet_name}' in {destination_file}")
+
+# Example usage:
+# copy_excel_sheet("source.xlsx", "Sheet1", "destination.xlsx", "CopiedSheet")
+
+Features:
+
+Copies cell values and styles (font, border, fill, alignment, etc.).
+
+Preserves column widths and row heights.
+
+Handles cases where the destination sheet already exists.
+
+
+Let me know if you need any modifications!
+
