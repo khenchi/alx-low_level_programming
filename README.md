@@ -1,4 +1,7 @@
 # alx-low_level_programming
+
+
+
 Low_level_programming
 
 
@@ -356,4 +359,80 @@ Handles cases where the destination sheet already exists.
 
 
 Let me know if you need any modifications!
+
+
+
+
+You can create a function to ensure that each column in your DataFrame adheres to a predefined schema. This function will:
+
+1. Check if all values in a column match the expected type.
+
+
+2. Convert or fix values where possible.
+
+
+3. Optionally log or raise errors for incompatible types.
+
+
+
+Here's a robust function to achieve this:
+
+import pandas as pd
+
+def enforce_schema(df: pd.DataFrame, schema: dict):
+    """
+    Ensures that the DataFrame columns adhere to the specified schema.
+    
+    Parameters:
+    df (pd.DataFrame): The input DataFrame.
+    schema (dict): A dictionary where keys are column names and values are the expected data types.
+    
+    Returns:
+    pd.DataFrame: A DataFrame with corrected data types.
+    """
+    df_fixed = df.copy()
+    
+    for column, expected_type in schema.items():
+        if column in df_fixed.columns:
+            # Fix types based on the schema
+            if expected_type == int:
+                df_fixed[column] = pd.to_numeric(df_fixed[column], errors='coerce').fillna(0).astype(int)
+            elif expected_type == float:
+                df_fixed[column] = pd.to_numeric(df_fixed[column], errors='coerce').fillna(0.0).astype(float)
+            elif expected_type == str:
+                df_fixed[column] = df_fixed[column].astype(str)
+            elif expected_type == bool:
+                df_fixed[column] = df_fixed[column].astype(bool)
+            else:
+                raise ValueError(f"Unsupported type {expected_type} for column {column}")
+
+    return df_fixed
+
+# Example usage
+data = {'column1': [1, '2', 3, 'a'], 'column2': [1.1, '2.2', 3.3, 'b'], 'column3': [True, 'False', 'yes', 0]}
+df = pd.DataFrame(data)
+
+# Define expected schema
+schema = {'column1': int, 'column2': float, 'column3': bool}
+
+# Enforce schema
+df_cleaned = enforce_schema(df, schema)
+
+# Display the cleaned DataFrame
+import ace_tools as tools
+tools.display_dataframe_to_user(name="Cleaned DataFrame", dataframe=df_cleaned)
+
+Explanation:
+
+The function takes a schema (dictionary) that defines the expected types for each column.
+
+It checks each column and converts values to the expected type.
+
+If conversion fails (e.g., a string where an integer is expected), it replaces invalid values with defaults (0 for int, 0.0 for float, False for bool).
+
+Raises an error if an unsupported type is encountered.
+
+
+This ensures type homogeneity and prevents type errors when processing data. Let me know if you need modifications!
+
 
